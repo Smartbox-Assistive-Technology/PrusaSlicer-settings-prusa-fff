@@ -38,7 +38,6 @@ jobs:
             build/prusa-fff-offline.zip
             build/vendor_indices.zip
             build/PrusaResearch.ini
-            build/${{ steps.version.outputs.version }}.ini
           generate_release_notes: false
           
       - name: Move latest tag
