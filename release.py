@@ -25,13 +25,13 @@ logging.basicConfig(
 def create_manifest():
     """Create the manifest.json file."""
     manifest = {
-        "name": "Prusa FFF",
-        "description": "Prusa FFF printers",
+        "name": "Prusa FFF Smartbox",
+        "description": "Smartbox custom Prusa FFF bundle",
         "visibility": "",
-        "id": "prusa-fff",
-        "url": "https://preset-repo-api.prusa3d.com/v1/repos/prusa-fff",
-        "index_url": "https://preset-repo-api.prusa3d.com/v1/repos/prusa-fff/vendor_indices.zip",
-        "offline_archive_url": "https://storage.googleapis.com/prusa3d-content-prod-14e8-preset-repo-api-public/prusa-fff/prusa-fff-offline.zip"
+        "id": "prusa-fff-smartbox",
+        "url": "https://github.com/Smartbox-Assistive-Technology/PrusaSlicer-settings-prusa-fff",
+        "index_url": "https://github.com/Smartbox-Assistive-Technology/PrusaSlicer-settings-prusa-fff/releases/latest/download/vendor_indices.zip",
+        "offline_archive_url": "https://github.com/Smartbox-Assistive-Technology/PrusaSlicer-settings-prusa-fff/releases/latest/download/prusa-fff-offline.zip"
     }
     
     with open('build/manifest.json', 'w', encoding='utf-8') as f:
@@ -56,14 +56,18 @@ def create_vendor_indices():
     with open(index_dest, 'w', encoding='utf-8') as dst:
         dst.write(content)
     
-    # Create the vendor_indices.zip
+    # Create the vendor_indices.zip for the offline bundle
+    with zipfile.ZipFile('build/vendor_indices_internal.zip', 'w', zipfile.ZIP_DEFLATED) as zf:
+        zf.write(index_dest, 'PrusaResearch.idx')
+    
+    # Create the standalone vendor_indices.zip for direct download
     with zipfile.ZipFile('build/vendor_indices.zip', 'w', zipfile.ZIP_DEFLATED) as zf:
         zf.write(index_dest, 'PrusaResearch.idx')
     
     # Clean up the temporary file
     index_dest.unlink()
     
-    logging.info('Created vendor_indices.zip')
+    logging.info('Created vendor_indices.zip (standalone and internal versions)')
 
 def copy_prusa_research_files():
     """Copy all files from PrusaResearch directory to build/PrusaResearch/."""
@@ -94,7 +98,7 @@ def create_offline_archive():
     # Check that all required components exist
     required_files = [
         'build/manifest.json',
-        'build/vendor_indices.zip',
+        'build/vendor_indices_internal.zip',
         'build/PrusaResearch'
     ]
     
@@ -109,8 +113,8 @@ def create_offline_archive():
         # Add manifest.json
         zf.write('build/manifest.json', 'manifest.json')
         
-        # Add vendor_indices.zip
-        zf.write('build/vendor_indices.zip', 'vendor_indices.zip')
+        # Add vendor_indices.zip (using internal version)
+        zf.write('build/vendor_indices_internal.zip', 'vendor_indices.zip')
         
         # Add all PrusaResearch files
         prusa_build_dir = Path('build/PrusaResearch')
@@ -178,12 +182,14 @@ def validate_archive():
         return True
 
 def cleanup_build_artifacts():
-    """Clean up intermediate build artifacts, keeping only the final zip."""
+    """Clean up intermediate build artifacts, keeping the final outputs."""
     build_dir = Path('build')
     
-    # Keep only the final zip file
+    # Keep the final outputs for CI
+    keep_files = {'prusa-fff-offline.zip', 'vendor_indices.zip', 'PrusaResearch.ini'}
+    
     for item in build_dir.iterdir():
-        if item.name != 'prusa-fff-offline.zip':
+        if item.name not in keep_files:
             if item.is_file():
                 item.unlink()
             elif item.is_dir():
@@ -191,7 +197,7 @@ def cleanup_build_artifacts():
                 import shutil
                 shutil.rmtree(item)
     
-    logging.info('Cleaned up build artifacts')
+    logging.info('Cleaned up build artifacts (kept ZIP, vendor indices, and INI files)')
 
 def main():
     """Main release process."""
@@ -218,7 +224,10 @@ def main():
         cleanup_build_artifacts()
         
         logging.info('Release build completed successfully')
-        logging.info('Output: build/prusa-fff-offline.zip')
+        logging.info('Output files:')
+        logging.info('  - build/prusa-fff-offline.zip (offline bundle)')
+        logging.info('  - build/vendor_indices.zip (vendor indices)')  
+        logging.info('  - build/PrusaResearch.ini (standalone configuration)')
         
     except Exception as e:
         logging.error(f'Release build failed: {e}')

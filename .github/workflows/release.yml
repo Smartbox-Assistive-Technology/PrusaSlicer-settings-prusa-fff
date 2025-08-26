@@ -32,6 +32,7 @@ jobs:
           tag_name: ${{ steps.date.outputs.release_time }}
           files: |
             build/prusa-fff-offline.zip
+            build/vendor_indices.zip
             build/PrusaResearch.ini
           generate_release_notes: true
           
