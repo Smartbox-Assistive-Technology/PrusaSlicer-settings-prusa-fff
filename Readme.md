@@ -7,20 +7,24 @@ This is a fork of the [Prusaslicer-settings-prusa-fff repo](https://github.com/p
 
 ## How it works
 
-The script add all the `*.add.in* and `*.rm.ini` files in the [Smartbox](Smartbox) folder to the latest version of the prusa3d/PrusaSlicer-settings-prusa-fff repo, and then creates a new release with the updated files.
+The script adds all the `*.add.ini` and `*.rm.ini` files in the [Smartbox](Smartbox) folder to the latest version of the prusa3d/PrusaSlicer-settings-prusa-fff repo, and then creates a new release with the updated files.
+
+## Filament Types
 
 Current filaments:
 
-- Overture TPU High-Speed
-- Eono PVB
+- **Eono PVB** - Support material for water-soluble supports
+- **Eryone PP-CF** - Polypropylene with carbon fiber reinforcement
+- **eSUN ePLA-CF** - Enhanced PLA with carbon fiber
+- **Overture TPU High-Speed** - Flexible thermoplastic polyurethane optimized for high-speed printing
+- **Polymaker PolyDissolve S1** - Water-soluble support material
 
-Past filaments:
+Past filaments (removed because they're now included in official PrusaSlicer):
 
-- Elegoo Rapid PLA+
-- Overture PETG
-- Overture PLA
-- Sunlu PLA+ 2.0
-- Polymaker PolyDissolve S1
+- **Elegoo Rapid PLA+**
+- **Overture PETG**
+- **Overture PLA** - Now included in official PrusaSlicer profiles
+- **Sunlu PLA+ 2.0** - Now included in official PrusaSlicer profiles
 
 
 ## Installing profiles
