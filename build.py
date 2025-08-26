@@ -140,7 +140,29 @@ def process_files():
     else:
         logging.warning('config_version not found in content')
     
-    # Write the final content with versioned filename
+    # Copy ALL original .ini files to maintain Prusa structure
+    prusa_build_dir = Path('build/PrusaResearch')
+    prusa_build_dir.mkdir(parents=True, exist_ok=True)
+    
+    prusa_source_dir = Path('PrusaResearch')
+    ini_files = list(prusa_source_dir.glob('*.ini'))
+    
+    for ini_file in ini_files:
+        if ini_file.name == latest_ini.name:
+            # Create the new versioned filename for our modified content
+            new_versioned_filename = create_versioned_ini('', version)
+            with open(prusa_build_dir / new_versioned_filename, 'w', encoding='utf-8') as f:
+                f.write(content)
+            logging.info(f'Wrote modified content as new version: {new_versioned_filename}')
+            # Don't copy the original latest file since we replaced it
+        else:
+            # Copy older versions as-is
+            import shutil
+            shutil.copy2(ini_file, prusa_build_dir / ini_file.name)
+    
+    logging.info(f'Copied {len(ini_files)} .ini files to build/PrusaResearch/')
+    
+    # Write the final content with versioned filename in root build dir
     versioned_filename = create_versioned_ini('', version)
     output_path = f'build/{versioned_filename}'
     
