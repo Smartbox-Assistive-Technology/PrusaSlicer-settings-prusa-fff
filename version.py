@@ -59,30 +59,30 @@ def parse_version(version_str):
         return (9, 2, 0)  # Default fallback
 
 def generate_version(git_info=None, prusa_base_version=None):
-    """Generate the next version number based on Prusa version with 9 prefix."""
+    """Generate the next version number based on Prusa version with simple bump."""
     if not prusa_base_version:
         prusa_base_version = get_prusa_base_version()
     
-    # Convert Prusa version like "2.3.0" to "92.3.0"
+    # Convert Prusa version like "2.3.0" to "2.4.0" (simple minor bump)
     prusa_parts = prusa_base_version.split('.')
     if len(prusa_parts) >= 3:
-        # Add 9 prefix to the major version: "2.3.0" -> "92.3.0"
-        major = f"9{prusa_parts[0]}"
-        minor = prusa_parts[1] 
-        patch = int(prusa_parts[2])
+        # Simple version: major=2, minor=prusa_minor+1, patch=0
+        major = "2"
+        minor = str(int(prusa_parts[1]) + 1)
+        patch = 0
         base_version = f"{major}.{minor}.{patch}"
     else:
         # Fallback if parsing fails
-        base_version = "92.3.0"
+        base_version = "2.4.0"
         patch = 0
     
     if not git_info:
         git_info = get_git_info()
     
-    # If we're on a tag, check if it follows our 9x.x.x pattern
+    # If we're on a tag, check if it follows our 2.x.x pattern
     if git_info and git_info['current_tag']:
         tag_version = git_info['current_tag'].lstrip('v')
-        if tag_version.startswith('9'):
+        if tag_version.startswith('2.') and len(tag_version.split('.')) == 3:
             return tag_version
     
     # For development builds, increment patch version to keep format simple
