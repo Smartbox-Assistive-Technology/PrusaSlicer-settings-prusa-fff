@@ -149,12 +149,14 @@ def process_files():
     
     for ini_file in ini_files:
         if ini_file.name == latest_ini.name:
-            # Create the new versioned filename for our modified content
+            # Copy the original file first
+            import shutil
+            shutil.copy2(ini_file, prusa_build_dir / ini_file.name)
+            # Then create our new versioned file with modified content
             new_versioned_filename = create_versioned_ini('', version)
             with open(prusa_build_dir / new_versioned_filename, 'w', encoding='utf-8') as f:
                 f.write(content)
-            logging.info(f'Wrote modified content as new version: {new_versioned_filename}')
-            # Don't copy the original latest file since we replaced it
+            logging.info(f'Copied original {ini_file.name} and created new version: {new_versioned_filename}')
         else:
             # Copy older versions as-is
             import shutil
