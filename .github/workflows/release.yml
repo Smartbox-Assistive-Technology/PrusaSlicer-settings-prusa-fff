@@ -18,12 +18,18 @@ jobs:
       
       - name: Build release
         run: |
+          python version.py
           python build.py
           python release.py
       
       - name: Read version info
         id: version
         run: |
+          if [ ! -f build/version.txt ]; then
+            echo "Error: build/version.txt not found"
+            ls -la build/
+            exit 1
+          fi
           VERSION=$(cat build/version.txt)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Generated version: $VERSION"
