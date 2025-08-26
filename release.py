@@ -28,7 +28,7 @@ def create_manifest():
         "name": "Prusa FFF Smartbox",
         "description": "Smartbox custom Prusa FFF bundle",
         "visibility": "",
-        "id": "prusa-fff-smartbox",
+        "id": "prusa-fff",
         "url": "https://github.com/Smartbox-Assistive-Technology/PrusaSlicer-settings-prusa-fff",
         "index_url": "https://github.com/Smartbox-Assistive-Technology/PrusaSlicer-settings-prusa-fff/releases/latest/download/vendor_indices.zip",
         "offline_archive_url": "https://github.com/Smartbox-Assistive-Technology/PrusaSlicer-settings-prusa-fff/releases/latest/download/prusa-fff-offline.zip"
