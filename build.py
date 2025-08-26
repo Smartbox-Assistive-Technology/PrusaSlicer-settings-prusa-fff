@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import sys
 from pathlib import Path
 
 logging.basicConfig(
@@ -74,6 +75,10 @@ def process_files():
         if rm_content_stripped in content:
             content = content.replace(rm_content_stripped, '')
             logging.info(f'Removed content from {rm_file}')
+        else:
+            logging.error(f'Content from {rm_file} not found in base configuration')
+            logging.error(f'Build failed: Cannot remove content that does not exist')
+            sys.exit(1)
     
     # Find the position of [printer:*common*]
     obsolete_pos = content.find('[printer:*common*]')
