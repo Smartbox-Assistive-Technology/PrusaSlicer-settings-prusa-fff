@@ -21,20 +21,25 @@ jobs:
           python build.py
           python release.py
       
-      - name: Generate release date
-        id: date
+      - name: Read version info
+        id: version
         run: |
-          echo "release_time=$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_OUTPUT
+          VERSION=$(cat build/version.txt)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Generated version: $VERSION"
 
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.date.outputs.release_time }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Smartbox PrusaSlicer Bundle v${{ steps.version.outputs.version }}
+          body_path: build/release_notes.md
           files: |
             build/prusa-fff-offline.zip
             build/vendor_indices.zip
             build/PrusaResearch.ini
-          generate_release_notes: true
+            build/${{ steps.version.outputs.version }}.ini
+          generate_release_notes: false
           
       - name: Move latest tag
         run: |
@@ -43,3 +48,7 @@ jobs:
           git tag -f latest
           git push origin :refs/tags/latest
           git push origin latest
+          
+          # Also push the version tag
+          git tag -f v${{ steps.version.outputs.version }}
+          git push origin v${{ steps.version.outputs.version }}

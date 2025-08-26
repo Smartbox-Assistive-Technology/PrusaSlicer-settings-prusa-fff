@@ -50,8 +50,34 @@ def strip_comments(text):
             
     return '\n'.join(lines)
 
+def create_versioned_ini(content, version):
+    """Create a versioned .ini filename based on our version."""
+    # The version will be something like "9.3.0" or "9.3.1-dev.42"
+    # We'll use just the main version part for the filename
+    base_version = version.split('-')[0]  # "9.3.0" from "9.3.0-dev.42"
+    return f'{base_version}.ini'
+
 def process_files():
     logging.info('Starting file processing')
+    
+    # Generate version information
+    logging.info('Generating version information')
+    import subprocess
+    try:
+        result = subprocess.run([sys.executable, 'version.py'], check=True, capture_output=True, text=True)
+        logging.info('Version generation completed')
+    except subprocess.CalledProcessError as e:
+        logging.error(f'Version generation failed: {e.stderr}')
+        sys.exit(1)
+    
+    # Read the generated version
+    try:
+        with open('build/version.txt', 'r') as f:
+            version = f.read().strip()
+        logging.info(f'Using version: {version}')
+    except FileNotFoundError:
+        logging.error('Version file not found, using fallback')
+        version = '9.3.0'
     Path('build').mkdir(exist_ok=True)
     logging.info('Created build directory')
     
@@ -105,10 +131,24 @@ def process_files():
         # Insert before [obsolete_presets]
         content = content[:obsolete_pos] + combined_additions + content[obsolete_pos:]
     
-    # Write the final content
+    # Write the final content with versioned filename
+    versioned_filename = create_versioned_ini('', version)
+    output_path = f'build/{versioned_filename}'
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    logging.info(f'Wrote final output to {output_path}')
+    
+    # Also create the standard PrusaResearch.ini for backwards compatibility
     with open('build/PrusaResearch.ini', 'w', encoding='utf-8') as f:
         f.write(content)
-    logging.info('Wrote final output to build/PrusaResearch.ini')
+    logging.info('Wrote backward compatibility file to build/PrusaResearch.ini')
+    
+    # Verify the generated index.idx file exists
+    if os.path.exists('build/index.idx'):
+        logging.info('Generated index.idx file is ready')
+    else:
+        logging.warning('Generated index.idx not found, this should not happen')
 
 if __name__ == '__main__':
     process_files()
