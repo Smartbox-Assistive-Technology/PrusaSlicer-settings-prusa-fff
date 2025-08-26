@@ -210,24 +210,6 @@ def validate_archive():
         logging.info(f'Archive validation successful: {len(entries)} total entries, {len(prusa_entries)} PrusaResearch files')
         return True
 
-def cleanup_build_artifacts():
-    """Clean up intermediate build artifacts, keeping the final outputs."""
-    build_dir = Path('build')
-    
-    # Keep the final outputs for CI
-    keep_files = {'prusa-fff-offline.zip', 'vendor_indices.zip', 'PrusaResearch.ini', 'version.txt', 'release_notes.md'}
-    
-    for item in build_dir.iterdir():
-        if item.name not in keep_files:
-            if item.is_file():
-                item.unlink()
-            elif item.is_dir():
-                # Remove directory and all contents
-                import shutil
-                shutil.rmtree(item)
-    
-    logging.info('Cleaned up build artifacts (kept ZIP, vendor indices, and INI files)')
-
 def main():
     """Main release process."""
     logging.info('Starting release build process')
@@ -249,14 +231,12 @@ def main():
             logging.error('Archive validation failed')
             sys.exit(1)
         
-        # Clean up intermediate files
-        cleanup_build_artifacts()
-        
         logging.info('Release build completed successfully')
         logging.info('Output files:')
         logging.info('  - build/prusa-fff-offline.zip (offline bundle)')
         logging.info('  - build/vendor_indices.zip (vendor indices)')  
         logging.info('  - build/PrusaResearch.ini (standalone configuration)')
+        logging.info('  - build/manifest.json (bundle manifest)')
         
     except Exception as e:
         logging.error(f'Release build failed: {e}')

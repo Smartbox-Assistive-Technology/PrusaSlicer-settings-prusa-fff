@@ -18,6 +18,9 @@ jobs:
       
       - name: Build release
         run: |
+          # Clean any previous build artifacts
+          rm -rf build
+          # Generate version and build files
           python version.py
           python build.py
           python release.py
@@ -44,16 +47,5 @@ jobs:
             build/prusa-fff-offline.zip
             build/vendor_indices.zip
             build/PrusaResearch.ini
+            build/manifest.json
           generate_release_notes: false
-          
-      - name: Move latest tag
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git tag -f latest
-          git push origin :refs/tags/latest
-          git push origin latest
-          
-          # Also push the version tag
-          git tag -f v${{ steps.version.outputs.version }}
-          git push origin v${{ steps.version.outputs.version }}
