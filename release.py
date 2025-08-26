@@ -70,7 +70,7 @@ def create_vendor_indices():
     logging.info('Created vendor_indices.zip (standalone and internal versions)')
 
 def copy_prusa_research_files():
-    """Copy all files from PrusaResearch directory to build/PrusaResearch/."""
+    """Copy all files from PrusaResearch directory to build/PrusaResearch/, using modified .ini if available."""
     prusa_dir = Path('PrusaResearch')
     build_prusa_dir = Path('build/PrusaResearch')
     
@@ -81,10 +81,39 @@ def copy_prusa_research_files():
     # Create build PrusaResearch directory
     build_prusa_dir.mkdir(exist_ok=True)
     
-    # Copy all files except index.idx (that goes in vendor_indices.zip)
     copied_files = 0
+    
+    # First, copy all files except .ini files and index.idx
     for file_path in prusa_dir.iterdir():
-        if file_path.is_file() and file_path.name != 'index.idx':
+        if (file_path.is_file() and 
+            file_path.name != 'index.idx' and 
+            not file_path.name.endswith('.ini')):
+            dest_path = build_prusa_dir / file_path.name
+            dest_path.write_bytes(file_path.read_bytes())
+            copied_files += 1
+    
+    # Then, copy the modified PrusaResearch.ini from build/ if it exists, 
+    # otherwise copy original .ini files
+    modified_ini = Path('build/PrusaResearch.ini')
+    if modified_ini.exists():
+        # Use the modified version and rename it to match the latest version
+        import re
+        ini_files = [f for f in prusa_dir.glob('*.ini') if re.match(r'\d+\.\d+\.\d+\.ini$', f.name)]
+        if ini_files:
+            def parse_version(filename):
+                match = re.match(r'(\d+)\.(\d+)\.(\d+)', filename.name)
+                if match:
+                    return tuple(map(int, match.groups()))
+                return (0, 0, 0)
+            
+            latest_ini = max(ini_files, key=lambda x: parse_version(x))
+            dest_path = build_prusa_dir / latest_ini.name
+            dest_path.write_bytes(modified_ini.read_bytes())
+            copied_files += 1
+            logging.info(f'Used modified {latest_ini.name} from build/PrusaResearch.ini')
+    else:
+        # Fallback: copy original .ini files
+        for file_path in prusa_dir.glob('*.ini'):
             dest_path = build_prusa_dir / file_path.name
             dest_path.write_bytes(file_path.read_bytes())
             copied_files += 1
