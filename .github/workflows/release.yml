@@ -16,10 +16,10 @@ jobs:
         with:
           python-version: '3.x'
       
-      - name: Process config files
+      - name: Build release
         run: |
-          mkdir -p build
           python build.py
+          python release.py
       
       - name: Generate release date
         id: date
@@ -30,7 +30,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.date.outputs.release_time }}
-          files: build/PrusaResearch.ini
+          files: |
+            build/prusa-fff-offline.zip
+            build/PrusaResearch.ini
           generate_release_notes: true
           
       - name: Move latest tag
