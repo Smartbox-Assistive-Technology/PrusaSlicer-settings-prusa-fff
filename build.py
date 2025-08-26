@@ -131,6 +131,15 @@ def process_files():
         # Insert before [obsolete_presets]
         content = content[:obsolete_pos] + combined_additions + content[obsolete_pos:]
     
+    # Update config_version to our version
+    import re
+    config_version_pattern = r'config_version\s*=\s*[^\n]+'
+    if re.search(config_version_pattern, content):
+        content = re.sub(config_version_pattern, f'config_version = {version}', content)
+        logging.info(f'Updated config_version to {version}')
+    else:
+        logging.warning('config_version not found in content')
+    
     # Write the final content with versioned filename
     versioned_filename = create_versioned_ini('', version)
     output_path = f'build/{versioned_filename}'
