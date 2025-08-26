@@ -215,7 +215,7 @@ def cleanup_build_artifacts():
     build_dir = Path('build')
     
     # Keep the final outputs for CI
-    keep_files = {'prusa-fff-offline.zip', 'vendor_indices.zip', 'PrusaResearch.ini'}
+    keep_files = {'prusa-fff-offline.zip', 'vendor_indices.zip', 'PrusaResearch.ini', 'version.txt', 'release_notes.md'}
     
     for item in build_dir.iterdir():
         if item.name not in keep_files:
