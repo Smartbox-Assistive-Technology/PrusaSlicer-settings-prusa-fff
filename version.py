@@ -59,23 +59,7 @@ def parse_version(version_str):
         return (9, 2, 0)  # Default fallback
 
 def generate_version(git_info=None, prusa_base_version=None):
-    """Generate the next version number based on Prusa version with simple bump."""
-    if not prusa_base_version:
-        prusa_base_version = get_prusa_base_version()
-    
-    # Convert Prusa version like "2.3.0" to "2.4.0" (simple minor bump)
-    prusa_parts = prusa_base_version.split('.')
-    if len(prusa_parts) >= 3:
-        # Simple version: major=2, minor=prusa_minor+1, patch=0
-        major = "2"
-        minor = str(int(prusa_parts[1]) + 1)
-        patch = 0
-        base_version = f"{major}.{minor}.{patch}"
-    else:
-        # Fallback if parsing fails
-        base_version = "2.4.0"
-        patch = 0
-    
+    """Generate the next version number based on existing tags and Prusa version."""
     if not git_info:
         git_info = get_git_info()
     
@@ -85,10 +69,42 @@ def generate_version(git_info=None, prusa_base_version=None):
         if tag_version.startswith('2.') and len(tag_version.split('.')) == 3:
             return tag_version
     
-    # For development builds, increment patch version to keep format simple
-    # This ensures we're always higher than the base Prusa version
-    dev_patch = patch + 1
-    return f"{major}.{minor}.{dev_patch}"
+    # Get all existing 2.x.x tags to find the highest version
+    try:
+        all_tags = subprocess.check_output(['git', 'tag', '-l'], text=True).strip().split('\n')
+        smartbox_tags = []
+        
+        for tag in all_tags:
+            clean_tag = tag.lstrip('v')
+            if re.match(r'^2\.\d+\.\d+$', clean_tag):
+                try:
+                    parts = clean_tag.split('.')
+                    version_tuple = (int(parts[0]), int(parts[1]), int(parts[2]))
+                    smartbox_tags.append(version_tuple)
+                except (ValueError, IndexError):
+                    continue
+        
+        if smartbox_tags:
+            # Get the highest existing version and increment patch
+            latest_version = max(smartbox_tags)
+            major, minor, patch = latest_version
+            return f"{major}.{minor}.{patch + 1}"
+    
+    except subprocess.CalledProcessError:
+        pass
+    
+    # Fallback: base on Prusa version if no existing tags found
+    if not prusa_base_version:
+        prusa_base_version = get_prusa_base_version()
+    
+    prusa_parts = prusa_base_version.split('.')
+    if len(prusa_parts) >= 3:
+        # Simple version: major=2, minor=prusa_minor+1, patch=0
+        major = "2"
+        minor = str(int(prusa_parts[1]) + 1)
+        return f"{major}.{minor}.0"
+    else:
+        return "2.4.0"
 
 def get_smartbox_filaments():
     """Get list of current Smartbox filaments from add/rm files."""
