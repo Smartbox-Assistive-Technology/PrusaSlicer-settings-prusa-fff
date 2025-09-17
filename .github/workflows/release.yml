@@ -37,6 +37,18 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Generated version: $VERSION"
 
+      - name: Upload test build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prusa-fff-test-artifacts-${{ steps.version.outputs.version }}
+          path: |
+            build/prusa-fff-offline.zip
+            build/vendor_indices.zip
+            build/PrusaResearch.ini
+            build/manifest.json
+            build/PrusaResearch/
+          retention-days: 7
+
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
