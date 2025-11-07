@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      
+      - name: Build and validate
+        run: |
+          # Clean any previous build artifacts
+          rm -rf build
+          
+          # Generate version and build files
+          python version.py
+          python build.py
+          python release.py
+          
+          # Verify all expected outputs exist
+          echo "Checking build outputs..."
+          test -f build/version.txt || { echo "Missing build/version.txt"; exit 1; }
+          test -f build/release_notes.md || { echo "Missing build/release_notes.md"; exit 1; }
+          test -f build/prusa-fff-offline.zip || { echo "Missing build/prusa-fff-offline.zip"; exit 1; }
+          test -f build/vendor_indices.zip || { echo "Missing build/vendor_indices.zip"; exit 1; }
+          test -f build/PrusaResearch.ini || { echo "Missing build/PrusaResearch.ini"; exit 1; }
+          test -f build/manifest.json || { echo "Missing build/manifest.json"; exit 1; }
+          
+          echo "✓ All build outputs present"
+          
+          # Show version info
+          VERSION=$(cat build/version.txt)
+          echo "Built version: $VERSION"
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            build/
+          retention-days: 3

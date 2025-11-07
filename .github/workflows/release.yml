@@ -1,6 +1,10 @@
 name: Fetch Latest PrusaSlicer Config and Release
+
 on:
-  push:
+  workflow_run:
+    workflows: ["Build"]
+    types:
+      - completed
     branches:
       - main
 
@@ -10,23 +14,18 @@ permissions:
 jobs:
   fetch-and-release:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          python-version: 3.x
-      
-      - name: Build release
-        run: |
-          # Clean any previous build artifacts
-          rm -rf build
-          # Generate version and build files
-          python version.py
-          python build.py
-          python release.py
+          name: build-artifacts
+          path: build/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Read version info
         id: version
@@ -40,17 +39,16 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Generated version: $VERSION"
 
-      - name: Upload test build artifacts
+      - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: prusa-fff-test-artifacts-${{ steps.version.outputs.version }}
+          name: release-artifacts-${{ steps.version.outputs.version }}
           path: |
             build/prusa-fff-offline.zip
             build/vendor_indices.zip
             build/PrusaResearch.ini
             build/manifest.json
-            build/PrusaResearch/
-          retention-days: 7
+          retention-days: 90
 
       - name: Create release
         uses: softprops/action-gh-release@v2
