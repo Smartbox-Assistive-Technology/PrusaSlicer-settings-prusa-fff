@@ -7,7 +7,29 @@ This is a fork of the [Prusaslicer-settings-prusa-fff repo](https://github.com/p
 
 ## How it works
 
-The script adds all the `*.add.ini` and `*.rm.ini` files in the [Smartbox](Smartbox) folder to the latest version of the prusa3d/PrusaSlicer-settings-prusa-fff repo, and then creates a new release with the updated files.
+The upstream Prusa configuration is included as a git submodule at `prusa-upstream/`. Three Python scripts work together to build custom configuration bundles:
+
+### Build Scripts
+
+**`version.py`**
+- Generates semantic version numbers based on git tags and Prusa base version
+- Scans `Smartbox/*.add.ini` and `*.rm.ini` files to detect filament changes
+- Creates `index.idx` file with version changelog
+- Generates markdown release notes with filament changes and recent commits
+
+**`build.py`**
+- Finds latest Prusa .ini file from submodule
+- Removes filament profiles specified in `Smartbox/*.rm.ini` files
+- Adds custom filament profiles from `Smartbox/*.add.ini` files
+- Updates config_version to match generated version
+- Copies all upstream .ini files to build directory
+
+**`release.py`**
+- Creates manifest.json with repository metadata
+- Packages index.idx into vendor_indices.zip
+- Copies all PrusaResearch assets (SVGs, STLs, thumbnails)
+- Assembles final `prusa-fff-offline.zip` bundle matching prusa structure
+- Validates the archive contains all required components
 
 ## Filament Types
 
