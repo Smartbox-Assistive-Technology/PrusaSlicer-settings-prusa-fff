@@ -7,7 +7,35 @@ This is a fork of the [Prusaslicer-settings-prusa-fff repo](https://github.com/p
 
 ## How it works
 
-The script adds all the `*.add.ini` and `*.rm.ini` files in the [Smartbox](Smartbox) folder to the latest version of the prusa3d/PrusaSlicer-settings-prusa-fff repo, and then creates a new release with the updated files.
+The release process uses 3 Python scripts:
+
+### 1. `version.py` - Version & Release Notes Generation
+- Generates semantic versions in format `2.x.x` (incrementing from existing tags)
+- Creates `build/index.idx` with version history
+- Generates release notes with added/updated/removed filaments and recent commits
+- Outputs: `build/version.txt`, `build/release_notes.md`, `build/version_info.json`, `build/index.idx`
+
+### 2. `build.py` - Configuration File Builder
+- Finds latest Prusa `.ini` file (e.g., `2.4.1.ini`)
+- Strips comments from all content
+- **Removes** sections specified in `Smartbox/*.rm.ini` files
+- **Adds** custom filaments from `Smartbox/*.add.ini` files (inserted before `[printer:*common*]` section)
+- Updates `config_version` to match the new version
+- Outputs: `build/PrusaResearch.ini` (modified config) and copies all original Prusa `.ini` files
+
+### 3. `release.py` - Bundle Creation
+- Creates `manifest.json` with URLs pointing to Smartbox-Assistive-Technology GitHub
+- Creates `vendor_indices.zip` containing `PrusaResearch.idx`
+- Copies all files from `build/PrusaResearch/` including the modified `.ini`
+- Creates final `prusa-fff-offline.zip` bundle with proper structure
+- Validates the bundle structure
+
+### Workflow
+1. Run `version.py` → generates version, index, release notes
+2. Run `build.py` → builds modified configuration files
+3. Run `release.py` → packages everything into distributable bundles
+
+The process customizes Prusa's official configs by removing unwanted filaments and adding Smartbox-specific ones, while maintaining compatibility with PrusaSlicer's configuration system.
 
 ## Filament Types
 
