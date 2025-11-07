@@ -152,7 +152,7 @@ def get_smartbox_filaments():
 def get_prusa_base_version():
     """Get the base Prusa configuration version we're extending."""
     # Find the highest numbered .ini file
-    prusa_dir = Path('PrusaResearch')
+    prusa_dir = Path('prusa-upstream/PrusaResearch')
     ini_files = list(prusa_dir.glob('*.ini'))
     
     # Parse version numbers and find the latest
@@ -198,7 +198,7 @@ def generate_index_idx(version, filaments, prusa_base_version):
     lines.append(f"{version} Smartbox custom configuration bundle based on Prusa {prusa_base_version}. {filament_summary}.")
     
     # Read existing index.idx and add all other entries (except our custom ones)
-    index_file = Path('PrusaResearch/index.idx')
+    index_file = Path('prusa-upstream/PrusaResearch/index.idx')
     if index_file.exists():
         with open(index_file, 'r', encoding='utf-8') as f:
             existing_lines = f.readlines()

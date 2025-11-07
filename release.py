@@ -71,7 +71,7 @@ def create_vendor_indices():
 
 def copy_prusa_research_files():
     """Copy all files from PrusaResearch directory to build/PrusaResearch/, using modified .ini if available."""
-    prusa_dir = Path('PrusaResearch')
+    prusa_dir = Path('prusa-upstream/PrusaResearch')
     build_prusa_dir = Path('build/PrusaResearch')
     
     if not prusa_dir.exists():

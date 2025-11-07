@@ -16,7 +16,7 @@ def parse_version(filename):
     return (0, 0, 0)
 
 def find_latest_ini():
-    prusa_dir = Path('PrusaResearch')
+    prusa_dir = Path('prusa-upstream/PrusaResearch')
     ini_files = [f for f in prusa_dir.glob('*.ini') if re.match(r'\d+\.\d+\.\d+\.ini$', f.name)]
     latest = max(ini_files, key=lambda x: parse_version(x))
     logging.info(f'Found latest ini file: {latest}')
@@ -144,7 +144,7 @@ def process_files():
     prusa_build_dir = Path('build/PrusaResearch')
     prusa_build_dir.mkdir(parents=True, exist_ok=True)
     
-    prusa_source_dir = Path('PrusaResearch')
+    prusa_source_dir = Path('prusa-upstream/PrusaResearch')
     ini_files = list(prusa_source_dir.glob('*.ini'))
     
     for ini_file in ini_files:
