@@ -1,12 +1,12 @@
-name: Release PrusaSlicer Config Bundle
+name: Build PrusaSlicer Config Bundle
 
 on:
   push:
     branches:
       - main
-
-permissions:
-  contents: write
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -55,38 +55,12 @@ jobs:
             build/release_notes.md
             build/version.txt
           retention-days: 30
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
       
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - name: Upload release notes
+        uses: actions/upload-artifact@v4
         with:
-          pattern: prusa-fff-bundle-*
-          merge-multiple: true
-          path: build/
-      
-      - name: Read version info
-        id: version
-        run: |
-          VERSION=$(cat build/version.txt)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Creating release for version: $VERSION"
-
-      - name: Create release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: Smartbox PrusaSlicer Bundle v${{ steps.version.outputs.version }}
-          body_path: build/release_notes.md
-          files: |
-            build/prusa-fff-offline.zip
-            build/vendor_indices.zip
-            build/PrusaResearch.ini
-            build/manifest.json
-          generate_release_notes: false
+          name: release-metadata-${{ steps.version.outputs.version }}
+          path: |
+            build/release_notes.md
+            build/version.txt
+          retention-days: 30
