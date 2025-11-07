@@ -31,6 +31,35 @@ The upstream Prusa configuration is included as a git submodule at `prusa-upstre
 - Assembles final `prusa-fff-offline.zip` bundle matching prusa structure
 - Validates the archive contains all required components
 
+## Making a Release
+
+### Automatic Release (Recommended)
+
+Releases are created automatically by CI when changes are merged to `main`:
+
+1. **Add/modify filament profiles** in the `Smartbox/` folder:
+   - Create `filament-name.add.ini` to add a new filament
+   - Create `filament-name.rm.ini` to remove an existing filament
+2. **Create a PR** with your changes (triggers build workflow for validation)
+3. **Merge to main** - this triggers the release workflow which:
+   - Builds the configuration bundle
+   - Auto-increments version (patch bump from latest tag)
+   - Generates release notes with detected filament changes
+   - Creates a GitHub release with all bundle files
+
+The version is automatically calculated as `2.X.Y` where X and Y are incremented based on existing tags.
+
+### Manual Build (Testing)
+
+To test locally before creating a PR:
+
+```bash
+python version.py   # Generate version and release notes
+python build.py     # Build configuration files
+python release.py   # Package the release bundle
+# Check build/ directory for outputs
+```
+
 ## Filament Types
 
 Current filaments:
